@@ -113,10 +113,10 @@ Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
         y, ySpace = leftAxis.space,
         yOffset = (ySpace*leftAxis.offset), 
         colors = dAttrs.color || dAttrs.colors || 'blue';
-    d.forEach( function(point) {
+    d.forEach( function(point, i) {
       x = bottomAxis.coordMin + (point[1] * xSpace) - (0.5 * xSpace);
       y = leftAxis.coordMin + (point[0] * ySpace) - (0.5 * ySpace);
-      canvas.rectangle(x, y, xSpace, ySpace, 0, {stroke: colors[j], fill: colors[j]}, 'cell-%@-%@'.fmt(this._getLetterString(x),y));
+      canvas.rectangle(x, y, xSpace, ySpace, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(this._getLetterString(x),y));
     });
   },
 
