@@ -27,11 +27,13 @@ end
 config :foundation, :required => []
 config :canvas, :required => [:foundation]
 config :graphs, :required => [:canvas]
+config :maps, :required => [:canvas]
 
 # WRAPPER FRAMEWORKS
 # config :sai, :required => [:foundation, :canvas, :graph]
 config :sai, :required => [:foundation, :canvas]
 config :'sai-graphs', :required => [:sai, :graphs]
+config :'sai-maps', :required => [:sai, :maps]
 
 # SPECIAL THEMES
 # These do not require any of the built-in SproutCore frameworks
