@@ -112,11 +112,23 @@ Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
         xOffset = (xSpace*bottomAxis.offset), 
         y, ySpace = leftAxis.space,
         yOffset = (ySpace*leftAxis.offset), 
+        alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        twoLetterLimit = 26*26,
+        letterString = 'ZZZ',
         colors = dAttrs.color || dAttrs.colors || 'blue';
     d.forEach( function(point, i) {
       x = bottomAxis.coordMin + (point[1] * xSpace) - (0.5 * xSpace);
       y = leftAxis.coordMin + (point[0] * ySpace) - (0.5 * ySpace);
-      canvas.rectangle(x, y, xSpace, ySpace, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(Sai.AlphabetNumberMapView._getLetterString(x),y));
+      if (x < 26) {
+        letterString = alphabet.charAt(x);
+      }
+      else if (x < twoLetterLimit) {
+        var multiple = x / 26;
+        var secondLetterIndex = alphabet.indexOf(multiple);
+        var secondLetter = alphabet.charAt(secondLetterIndex);
+        letterString = alphabet.charAt(index % 26) + secondLetter;
+      }
+      canvas.rectangle(x, y, xSpace, ySpace, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(letterString, y));
     });
   },
 
