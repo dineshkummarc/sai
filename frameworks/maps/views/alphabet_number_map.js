@@ -61,7 +61,7 @@ Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
 
     axes = this._makeAxes(f, canvas, d) || [];
 
-    _plotCells(f, canvas, d, dAttrs, axes[0], axes[1], axes[2], axes[3]);
+    this._plotCells(f, canvas, d, dAttrs, axes[0], axes[1], axes[2], axes[3]);
   },
   
   _makeAxes: function(f, canvas, d){
