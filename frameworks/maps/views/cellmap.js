@@ -1,10 +1,10 @@
 // ..........................................................
-// A basic Line chart
+// A basic map of cells
 // 
 /*globals Sai */
 sc_require('views/basemap');
 
-Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
+Sai.CellMapView = Sai.BaseMapView.extend({
   
   // ..........................................................
   // Properties
@@ -24,15 +24,11 @@ Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
   //   A  ...   Z    AA  ...  ZA   AB ...  ZB
   //   1  ...  26    27  ...  52   53 ...  78 etc.
   //
-  // If my memory serves, a map cell is referred to as a letter_string/number
+  // If my memory serves, a map cell is referred to by a letter_string/number
   // pair (y/x), which is switched from normal x/y order. For example,
-  // cells would be referred to as A13, J24, CB42.
+  // cells would be referred to as A13, J24, CB42, where A, J, and CB are y
+  // coordinates..
   //
-  alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-
-  // We only handle one- or two-letter letter_strings. (26 combinations of 26)
-  twoLetterLimit: 26 * 26,
-
   data: null,
   
   // @param: dataAttrs - Hash of styling parameters
@@ -59,13 +55,13 @@ Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
 
     if (!firstTime) canvas.clear();  
 
-    axes = this._makeAxes(f, canvas, d) || [];
+    axes = this._makeAxes(f, canvas, d, dAttrs) || [];
 
     this._plotCells(f, canvas, d, dAttrs, axes[0], axes[1], axes[2], axes[3]);
   },
   
-  _makeAxes: function(f, canvas, d){
-    var axis, path, tCount, space, offset, tmp, aa,
+  _makeAxes: function(f, canvas, d, dAttrs){
+    var axis, path, tCount, space, offset, tmp, aa, width, height,
         yaLeft = this.get('leftAxis') || {}, yScale,
         yaRight = this.get('rightAxis') || {}, 
         xaBottom = this.get('bottomAxis') || {},
@@ -77,31 +73,43 @@ Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
         // Y coordinate stuff
         startY = f.height*(1.0 - xMargin),
         endY = f.height*0.05, dLen = d.length || 0;
-        
+
     // X axes
     if (xaBottom){
       // Calculate the coordinate system
       xaBottom.coordMin = startX;
       xaBottom.coordMax = endX;
+      width = (endX - startX);
+      aa = this._calcForLabelAlignment(xaBottom, startX, endX, width);
+      xaBottom = aa[0]; tCount = aa[1];
       if (SC.none(xaBottom.hidden) || !xaBottom.hidden) this.makeAxis(canvas, startX, startY, endX, startY, xaBottom, {direction: 'x-bottom', len: 5, count: tCount, space: xaBottom.space, offset: xaBottom.offset});
     }
     if (xaTop){
       // Calculate the coordinate system
       xaTop.coordMin = startX;
       xaTop.coordMax = endX;
-      if (SC.none(xaTop.hidden) || !xaTop.hidden) this.makeAxis(canvas, startX, startY, endX, startY, xaTop, {direction: 'x-top', len: 5, count: tCount, space: xaTop.space, offset: xaTop.offset});
+      width = (endX - startX);
+      aa = this._calcForLabelAlignment(xaTop, startX, endX, width);
+      xaTop = aa[0]; tCount = aa[1];
+      if (SC.none(xaTop.hidden) || !xaTop.hidden) this.makeAxis(canvas, startX, endY, endX, endY, xaTop, {direction: 'x-top', len: 5, count: tCount, space: xaTop.space, offset: xaTop.offset});
     }
 
     // Y axes
     if (yaLeft){
       yaLeft.coordMin = startY;
       yaLeft.coordMax = endY;
+      height = (endY - startY);
+      aa = this._calcForLabelAlignment(yaLeft, endY, startY, height);
+      yaLeft = aa[0]; tCount = aa[1];
       if (SC.none(yaLeft.hidden) || !yaLeft.hidden) this.makeAxis(canvas, startX, startY, startX, endY, yaLeft, {direction: 'y-left', len: 5, count: tCount, space: yaLeft.space, offset: yaLeft.offset});
     }
     if (yaRight){
       yaRight.coordMin = startY;
       yaRight.coordMax = endY;
-      if (SC.none(yaRight.hidden) || !yaRight.hidden) this.makeAxis(canvas, startX, startY, startX, endY, yaRight, {direction: 'y-right', len: 5, count: tCount, space: yaRight.space, offset: yaRight.offset});
+      height = (endY - startY);
+      aa = this._calcForLabelAlignment(yaRight, endY, startY, height);
+      yaRight = aa[0]; tCount = aa[1];
+      if (SC.none(yaRight.hidden) || !yaRight.hidden) this.makeAxis(canvas, endX, startY, endX, endY, yaRight, {direction: 'y-right', len: 5, count: tCount, space: yaRight.space, offset: yaRight.offset});
     }
     
     return [xaBottom, xaTop, yaLeft, yaRight];
@@ -115,20 +123,26 @@ Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
         alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
         twoLetterLimit = 26*26,
         letterString = 'ZZZ',
+        cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / bottomAxis.tCount;
+        cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / leftAxis.tCount;
         colors = dAttrs.color || dAttrs.colors || 'blue';
     d.forEach( function(point, i) {
-      x = bottomAxis.coordMin + (point[1] * xSpace) - (0.5 * xSpace);
-      y = leftAxis.coordMin + (point[0] * ySpace) - (0.5 * ySpace);
-      if (x < 26) {
-        letterString = alphabet.charAt(x);
+      x = bottomAxis.coordMin + (point[0] * cellWidth) - (0.5 * cellWidth);
+      y = leftAxis.coordMin + (point[1] * cellHeight) - (0.5 * cellHeight);
+
+      // construct the letter string
+      if (y < 26) {
+        letterString = alphabet.charAt(y);
       }
-      else if (x < twoLetterLimit) {
-        var multiple = x / 26;
+      else if (y < twoLetterLimit) {
+        var multiple = y / 26;
         var secondLetterIndex = alphabet.indexOf(multiple);
         var secondLetter = alphabet.charAt(secondLetterIndex);
-        letterString = alphabet.charAt(index % 26) + secondLetter;
+        letterString = alphabet.charAt(y % 26) + secondLetter;
       }
-      canvas.rectangle(x, y, xSpace, ySpace, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(letterString, y));
+
+      // draw the rectangle for the cell
+      canvas.rectangle(x, y, cellWidth, cellHeight, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(letterString, y));
     });
   },
 
@@ -147,6 +161,32 @@ Sai.AlphabetNumberMapView = Sai.BaseMapView.extend({
     else {
       return 'ZZZ';
     }
-  }
+  },
+
+  _calcForLabelAlignment: function(axis, start, end, maxWorldCoordinates){
+    var tCount, hasStepIncrement, hasStepCount;
+    axis = axis || {};
+    hasStepIncrement = !SC.none(axis.step);
+    hasStepCount = !SC.none(axis.steps);
+     
+    axis.coordScale = (end - start) / maxWorldCoordinates;
+         
+    if(!hasStepIncrement && !hasStepCount){ // make and educated guess with 25 tick marks
+      tCount = 25;
+      axis.step = ~~(maxWorldCoordinates/tCount);
+    } else if(hasStepCount){ // use a total count of X
+      tCount = axis.steps;
+      axis.step = ~~(maxWorldCoordinates/tCount);
+    } else { // Use step increments of X
+      tCount = ~~(maxWorldCoordinates / axis.step);
+    }
+    
+    axis.space = (end - start)/tCount;
+    tCount += 1; // add the last tick to the line
+    axis.offset = 0;
+    
+    // Return modified Axis and tick count
+    return [axis, tCount];
+    }
 });
 

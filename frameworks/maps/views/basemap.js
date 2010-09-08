@@ -19,7 +19,18 @@ Sai.BaseMapView = Sai.CanvasView.extend({
       space = ticks.space;
       
       // Find the right tick intremental function based off of the axis (X or Y)
-      tickFunc = (dir === 'x-bottom' || dir === 'x-top') ? function(x,y,sp){ return [x, (y+tLen), (x+sp), y]; } : function(x,y,sp){ return [(x-tLen), y, x, (y-sp)]; };
+      if (dir === 'x-bottom') {
+        tickFunc = function(x,y,sp){ return [x, (y+tLen), (x+sp), y]; };
+      }
+      else if (dir == 'x-top') {
+        tickFunc = function(x,y,sp){ return [x, (y-tLen), (x+sp), y]; };
+      }
+      else if (dir == 'y-left') {
+        tickFunc = function(x,y,sp){ return [(x-tLen), y, x, (y-sp)]; };
+      }
+      else {  // y-right
+        tickFunc = function(x,y,sp){ return [(x+tLen), y, x, (y-sp)]; };
+      }
       
       // Some times you want to ofset the start of the ticks to center
       tOff = ticks.offset || 0;
@@ -126,9 +137,9 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     // TODO: [EG] make the grid
   },
   
-  rounder: function(x){
-    if (x > (~~x+0.00051)) return x.toFixed(3);
-    return x.toFixed(0);
+  rounder: function(coord){
+    if (coord > (~~coord+0.00051)) return coord.toFixed(3);
+    return coord.toFixed(0);
   }
   
 });
