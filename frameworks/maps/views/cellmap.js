@@ -49,9 +49,9 @@ Sai.CellMapView = Sai.BaseMapView.extend({
     var grid = this.get('grid'),
         d = this.get('data') || [],
         dAttrs = this.get('dataAttrs') || {colors: 'black'},
-        f = this.get('frame'), axis;
+        f = this.get('frame'), axes;
 
-    if(d.length === 0) return;
+    if (d.length === 0) return;
 
     if (!firstTime) canvas.clear();  
 
@@ -80,7 +80,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       xaBottom.coordMin = startX;
       xaBottom.coordMax = endX;
       width = (endX - startX);
-      aa = this._calcForLabelAlignment(xaBottom, startX, endX, width);
+      aa = this._calculateForAxis(xaBottom, startX, endX, width);
       xaBottom = aa[0]; tCount = aa[1];
       if (SC.none(xaBottom.hidden) || !xaBottom.hidden) this.makeAxis(canvas, startX, startY, endX, startY, xaBottom, {direction: 'x-bottom', len: 5, count: tCount, space: xaBottom.space, offset: xaBottom.offset});
     }
@@ -89,25 +89,25 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       xaTop.coordMin = startX;
       xaTop.coordMax = endX;
       width = (endX - startX);
-      aa = this._calcForLabelAlignment(xaTop, startX, endX, width);
+      aa = this._calculateForAxis(xaTop, startX, endX, width);
       xaTop = aa[0]; tCount = aa[1];
       if (SC.none(xaTop.hidden) || !xaTop.hidden) this.makeAxis(canvas, startX, endY, endX, endY, xaTop, {direction: 'x-top', len: 5, count: tCount, space: xaTop.space, offset: xaTop.offset});
     }
 
     // Y axes
     if (yaLeft){
-      yaLeft.coordMin = startY;
-      yaLeft.coordMax = endY;
+      yaLeft.coordMin = endY;
+      yaLeft.coordMax = startY;
       height = (endY - startY);
-      aa = this._calcForLabelAlignment(yaLeft, endY, startY, height);
+      aa = this._calculateForAxis(yaLeft, endY, startY, height);
       yaLeft = aa[0]; tCount = aa[1];
       if (SC.none(yaLeft.hidden) || !yaLeft.hidden) this.makeAxis(canvas, startX, startY, startX, endY, yaLeft, {direction: 'y-left', len: 5, count: tCount, space: yaLeft.space, offset: yaLeft.offset});
     }
     if (yaRight){
-      yaRight.coordMin = startY;
-      yaRight.coordMax = endY;
+      yaRight.coordMin = endY;
+      yaRight.coordMax = startY;
       height = (endY - startY);
-      aa = this._calcForLabelAlignment(yaRight, endY, startY, height);
+      aa = this._calculateForAxis(yaRight, endY, startY, height);
       yaRight = aa[0]; tCount = aa[1];
       if (SC.none(yaRight.hidden) || !yaRight.hidden) this.makeAxis(canvas, endX, startY, endX, endY, yaRight, {direction: 'y-right', len: 5, count: tCount, space: yaRight.space, offset: yaRight.offset});
     }
@@ -115,7 +115,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
     return [xaBottom, xaTop, yaLeft, yaRight];
   }, 
 
-  _plotCells: function(f, canvas, d, dAttrs, leftAxis, rightAxis, bottomAxis, topAxis){
+  _plotCells: function(f, canvas, d, dAttrs, bottomAxis, topAxis, leftAxis, rightAxis){
     var x, xSpace = bottomAxis.space,
         xOffset = (xSpace*bottomAxis.offset), 
         y, ySpace = leftAxis.space,
@@ -123,8 +123,8 @@ Sai.CellMapView = Sai.BaseMapView.extend({
         alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
         twoLetterLimit = 26*26,
         letterString = 'ZZZ',
-        cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / bottomAxis.tCount;
-        cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / leftAxis.tCount;
+        cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / bottomAxis.cellCount;
+        cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / leftAxis.cellCount;
         colors = dAttrs.color || dAttrs.colors || 'blue';
     d.forEach( function(point, i) {
       x = bottomAxis.coordMin + (point[0] * cellWidth) - (0.5 * cellWidth);
@@ -142,6 +142,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       }
 
       // draw the rectangle for the cell
+      console.log(x, y, cellWidth, cellHeight);
       canvas.rectangle(x, y, cellWidth, cellHeight, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(letterString, y));
     });
   },
@@ -163,7 +164,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
     }
   },
 
-  _calcForLabelAlignment: function(axis, start, end, maxWorldCoordinates){
+  _calculateForAxis: function(axis, start, end, maxWorldCoordinates){
     var tCount, hasStepIncrement, hasStepCount;
     axis = axis || {};
     hasStepIncrement = !SC.none(axis.step);
@@ -182,6 +183,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
     }
     
     axis.space = (end - start)/tCount;
+    axis.cellCount = tCount;
     tCount += 1; // add the last tick to the line
     axis.offset = 0;
     

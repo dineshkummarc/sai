@@ -22,10 +22,10 @@ Sai.BaseMapView = Sai.CanvasView.extend({
       if (dir === 'x-bottom') {
         tickFunc = function(x,y,sp){ return [x, (y+tLen), (x+sp), y]; };
       }
-      else if (dir == 'x-top') {
+      else if (dir === 'x-top') {
         tickFunc = function(x,y,sp){ return [x, (y-tLen), (x+sp), y]; };
       }
-      else if (dir == 'y-left') {
+      else if (dir === 'y-left') {
         tickFunc = function(x,y,sp){ return [(x-tLen), y, x, (y-sp)]; };
       }
       else {  // y-right
@@ -84,7 +84,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
         // canvas.rectangle(x, y, lWidth, lHeight, 0, {fill: aa.labelColor || aa.color || 'black', textAnchor: 'center', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
       };
     }
-    else if(dir === 'x-top') {
+    else if (dir === 'x-top') {
       labelPosFunc = function(t, label){ 
         var x, y;
         x = +t.x - (lWidth/2);
@@ -93,7 +93,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
         // canvas.rectangle(x, y, lWidth, lHeight, 0, {fill: aa.labelColor || aa.color || 'black', textAnchor: 'center', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
       };
     }
-    else if(dir === 'y-left') {
+    else if (dir === 'y-left') {
       labelPosFunc = function(t, label){ 
         var x, y;
         x = t.x - lWidth;
@@ -102,7 +102,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
         // canvas.rectangle(x, y, lWidth, lHeight, 0, {fill: aa.labelColor || aa.color || 'black', textAnchor: 'right', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
       };
     }
-    else if(dir === 'y-right') {
+    else if (dir === 'y-right') {
       labelPosFunc = function(t, label){ 
         var x, y;
         x = t.x + lOff;
