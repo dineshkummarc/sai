@@ -15,20 +15,6 @@ Sai.CellMapView = Sai.BaseMapView.extend({
   // Cell #2: "5, 6"
   // Cell #3: "8, 3"
   //
-  // where each coordinate represents a number/letter_string pair. Numbers
-  // are integer numbers for the x-axis. Letter strings on such maps are usually
-  // placed on the y-axix. Letter strings are represented by
-  // an integer index into the 26-letter alphabet, or multiples thereof.
-  // So, we have: 
-  //
-  //   A  ...   Z    AA  ...  ZA   AB ...  ZB
-  //   1  ...  26    27  ...  52   53 ...  78 etc.
-  //
-  // If my memory serves, a map cell is referred to by a letter_string/number
-  // pair (y/x), which is switched from normal x/y order. For example,
-  // cells would be referred to as A13, J24, CB42, where A, J, and CB are y
-  // coordinates..
-  //
   data: null,
   
   // @param: dataAttrs - Hash of styling parameters
@@ -120,9 +106,6 @@ Sai.CellMapView = Sai.BaseMapView.extend({
         xOffset = (xSpace*bottomAxis.offset), 
         y, ySpace = leftAxis.space,
         yOffset = (ySpace*leftAxis.offset), 
-        alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-        twoLetterLimit = 26*26,
-        letterString = 'ZZZ',
         cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / bottomAxis.cellCount;
         cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / leftAxis.cellCount;
         colors = dAttrs.color || dAttrs.colors || 'blue';
@@ -130,38 +113,10 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       x = bottomAxis.coordMin + (point[0] * cellWidth) - (0.5 * cellWidth);
       y = leftAxis.coordMin + (point[1] * cellHeight) - (0.5 * cellHeight);
 
-      // construct the letter string
-      if (y < 26) {
-        letterString = alphabet.charAt(y);
-      }
-      else if (y < twoLetterLimit) {
-        var multiple = y / 26;
-        var secondLetterIndex = alphabet.indexOf(multiple);
-        var secondLetter = alphabet.charAt(secondLetterIndex);
-        letterString = alphabet.charAt(y % 26) + secondLetter;
-      }
-
       // draw the rectangle for the cell
       console.log(x, y, cellWidth, cellHeight);
-      canvas.rectangle(x, y, cellWidth, cellHeight, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(letterString, y));
+      canvas.rectangle(x, y, cellWidth, cellHeight, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(x, y));
     });
-  },
-
-  _getLetterString: function(index) {
-    // We only handle one- or two-letter letter_strings.
-    //
-    if (index < 26) {
-      return this.alphabet.charAt(index);
-    }
-    else if (index < this.twoLetterLimit) {
-      var multiple = index / 26;
-      var secondLetterIndex = alphabet.indexOf(multiple);
-      var secondLetter = this._getLetterString(secondLetterIndex);
-      return this.alphabet.charAt(index % 26) + secondLetter;
-    }
-    else {
-      return 'ZZZ';
-    }
   },
 
   _calculateForAxis: function(axis, start, end, maxWorldCoordinates){
