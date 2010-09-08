@@ -56,11 +56,11 @@ Sai.CellMapView = Sai.BaseMapView.extend({
         xaTop = this.get('topAxis') || {},
         xMargin = xaBottom.margin || 0.1,
         yMargin = yaLeft.margin || 0.1,
-        startX = f.width*yMargin,
-        endX = f.width*0.95,
+        startX = f.width*xMargin,
+        endX = f.width*0.9,
         // Y coordinate stuff
-        startY = f.height*(1.0 - xMargin),
-        endY = f.height*0.05, dLen = d.length || 0;
+        startY = f.height*(1.0 - yMargin),
+        endY = f.height*0.1, dLen = d.length || 0;
 
     // X axes
     if (xaBottom){
@@ -86,7 +86,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
     if (yaLeft){
       yaLeft.coordMin = endY;
       yaLeft.coordMax = startY;
-      height = (endY - startY);
+      height = (startY - endY);
       aa = this._calculateForAxis(yaLeft, endY, startY, yCellCount, height);
       yaLeft = aa[0]; tCount = aa[1];
       if (SC.none(yaLeft.hidden) || !yaLeft.hidden) this.makeAxis(canvas, startX, startY, startX, endY, yaLeft, {direction: 'y-left', len: 5, count: tCount, space: yaLeft.space, offset: yaLeft.offset});
@@ -94,7 +94,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
     if (yaRight){
       yaRight.coordMin = endY;
       yaRight.coordMax = startY;
-      height = (endY - startY);
+      height = (startY - endY);
       aa = this._calculateForAxis(yaRight, endY, startY, yCellCount, height);
       yaRight = aa[0]; tCount = aa[1];
       if (SC.none(yaRight.hidden) || !yaRight.hidden) this.makeAxis(canvas, endX, startY, endX, endY, yaRight, {direction: 'y-right', len: 5, count: tCount, space: yaRight.space, offset: yaRight.offset});
@@ -108,12 +108,15 @@ Sai.CellMapView = Sai.BaseMapView.extend({
         xOffset = (xSpace*bottomAxis.offset), 
         y, ySpace = leftAxis.space,
         yOffset = (ySpace*leftAxis.offset), 
-        cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / dAttrs.xCellCount;
-        cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / dAttrs.yCellCount;
+        cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / dAttrs.xCellCount,
+        cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / dAttrs.yCellCount,
+        yCellCount = dAttrs.yCellCount,
         colors = dAttrs.color || dAttrs.colors || 'blue';
     d.forEach( function(point, i) {
-      x = bottomAxis.coordMin + (point[0] * cellWidth) - (0.5 * cellWidth);
-      y = leftAxis.coordMin + (point[1] * cellHeight) - (0.5 * cellHeight);
+      x = bottomAxis.coordMin + ((point[0]-1) * cellWidth);
+      
+      // flip y
+      y = leftAxis.coordMax - (point[1] * cellHeight);
 
       // draw the rectangle for the cell
       canvas.rectangle(x, y, cellWidth, cellHeight, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(x, y));
@@ -128,7 +131,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
      
     axis.coordScale = (end - start) / maxWorldCoordinates;
          
-    if(!hasStepIncrement && !hasStepCount){ // use provide cellCount
+    if (!hasStepIncrement && !hasStepCount){ // use provided cellCount
       tCount = cellCount;
       axis.step = ~~(maxWorldCoordinates/tCount);
     } else if(hasStepCount){ // use a total count of X

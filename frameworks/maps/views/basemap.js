@@ -78,7 +78,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     if (dir === 'x-bottom'){
       labelPosFunc = function(t, label){ 
         var x, y;
-        x = +t.x - (lWidth/2);
+        x = +t.x;
         y = +t.y + lOff;
         canvas.text(x, y, lWidth, lHeight, label, {fill: col, stroke: col, textAnchor: 'center', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
         // canvas.rectangle(x, y, lWidth, lHeight, 0, {fill: aa.labelColor || aa.color || 'black', textAnchor: 'center', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
@@ -87,8 +87,8 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     else if (dir === 'x-top') {
       labelPosFunc = function(t, label){ 
         var x, y;
-        x = +t.x - (lWidth/2);
-        y = +t.y - (lHeight/2) - lOff;
+        x = +t.x;
+        y = +t.y - lHeight - (lHeight/2) - lOff;
         canvas.text(x, y, lWidth, lHeight, label, {fill: col, stroke: col, textAnchor: 'center', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
         // canvas.rectangle(x, y, lWidth, lHeight, 0, {fill: aa.labelColor || aa.color || 'black', textAnchor: 'center', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
       };
@@ -96,8 +96,8 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     else if (dir === 'y-left') {
       labelPosFunc = function(t, label){ 
         var x, y;
-        x = t.x - lWidth;
-        y = t.y - (lHeight/2) + lOff;
+        x = +t.x - lWidth;
+        y = +t.y - lHeight - (lHeight/3);
         canvas.text(x, y, lWidth, lHeight, label, {fill: col, stroke: col, textAnchor: 'right', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
         // canvas.rectangle(x, y, lWidth, lHeight, 0, {fill: aa.labelColor || aa.color || 'black', textAnchor: 'right', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
       };
@@ -105,8 +105,8 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     else if (dir === 'y-right') {
       labelPosFunc = function(t, label){ 
         var x, y;
-        x = t.x + lOff;
-        y = t.y - (lHeight/2) + lOff;
+        x = +t.x + lOff;
+        y = +t.y - lHeight - (lHeight/3);
         canvas.text(x, y, lWidth, lHeight, label, {fill: col, stroke: col, textAnchor: 'right', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
         // canvas.rectangle(x, y, lWidth, lHeight, 0, {fill: aa.labelColor || aa.color || 'black', textAnchor: 'right', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
       };
