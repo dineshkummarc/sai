@@ -51,6 +51,8 @@ Sai.CellMapView = Sai.BaseMapView.extend({
         yaLeft = this.get('leftAxis') || {}, yScale,
         yaRight = this.get('rightAxis') || {}, 
         xaBottom = this.get('bottomAxis') || {},
+        xCellCount = dAttrs.xCellCount,
+        yCellCount = dAttrs.yCellCount,
         xaTop = this.get('topAxis') || {},
         xMargin = xaBottom.margin || 0.1,
         yMargin = yaLeft.margin || 0.1,
@@ -66,7 +68,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       xaBottom.coordMin = startX;
       xaBottom.coordMax = endX;
       width = (endX - startX);
-      aa = this._calculateForAxis(xaBottom, startX, endX, width);
+      aa = this._calculateForAxis(xaBottom, startX, endX, xCellCount, width);
       xaBottom = aa[0]; tCount = aa[1];
       if (SC.none(xaBottom.hidden) || !xaBottom.hidden) this.makeAxis(canvas, startX, startY, endX, startY, xaBottom, {direction: 'x-bottom', len: 5, count: tCount, space: xaBottom.space, offset: xaBottom.offset});
     }
@@ -75,7 +77,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       xaTop.coordMin = startX;
       xaTop.coordMax = endX;
       width = (endX - startX);
-      aa = this._calculateForAxis(xaTop, startX, endX, width);
+      aa = this._calculateForAxis(xaTop, startX, endX, xCellCount, width);
       xaTop = aa[0]; tCount = aa[1];
       if (SC.none(xaTop.hidden) || !xaTop.hidden) this.makeAxis(canvas, startX, endY, endX, endY, xaTop, {direction: 'x-top', len: 5, count: tCount, space: xaTop.space, offset: xaTop.offset});
     }
@@ -85,7 +87,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       yaLeft.coordMin = endY;
       yaLeft.coordMax = startY;
       height = (endY - startY);
-      aa = this._calculateForAxis(yaLeft, endY, startY, height);
+      aa = this._calculateForAxis(yaLeft, endY, startY, yCellCount, height);
       yaLeft = aa[0]; tCount = aa[1];
       if (SC.none(yaLeft.hidden) || !yaLeft.hidden) this.makeAxis(canvas, startX, startY, startX, endY, yaLeft, {direction: 'y-left', len: 5, count: tCount, space: yaLeft.space, offset: yaLeft.offset});
     }
@@ -93,7 +95,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       yaRight.coordMin = endY;
       yaRight.coordMax = startY;
       height = (endY - startY);
-      aa = this._calculateForAxis(yaRight, endY, startY, height);
+      aa = this._calculateForAxis(yaRight, endY, startY, yCellCount, height);
       yaRight = aa[0]; tCount = aa[1];
       if (SC.none(yaRight.hidden) || !yaRight.hidden) this.makeAxis(canvas, endX, startY, endX, endY, yaRight, {direction: 'y-right', len: 5, count: tCount, space: yaRight.space, offset: yaRight.offset});
     }
@@ -106,20 +108,19 @@ Sai.CellMapView = Sai.BaseMapView.extend({
         xOffset = (xSpace*bottomAxis.offset), 
         y, ySpace = leftAxis.space,
         yOffset = (ySpace*leftAxis.offset), 
-        cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / bottomAxis.cellCount;
-        cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / leftAxis.cellCount;
+        cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / dAttrs.xCellCount;
+        cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / dAttrs.yCellCount;
         colors = dAttrs.color || dAttrs.colors || 'blue';
     d.forEach( function(point, i) {
       x = bottomAxis.coordMin + (point[0] * cellWidth) - (0.5 * cellWidth);
       y = leftAxis.coordMin + (point[1] * cellHeight) - (0.5 * cellHeight);
 
       // draw the rectangle for the cell
-      console.log(x, y, cellWidth, cellHeight);
       canvas.rectangle(x, y, cellWidth, cellHeight, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(x, y));
     });
   },
 
-  _calculateForAxis: function(axis, start, end, maxWorldCoordinates){
+  _calculateForAxis: function(axis, start, end, cellCount, maxWorldCoordinates){
     var tCount, hasStepIncrement, hasStepCount;
     axis = axis || {};
     hasStepIncrement = !SC.none(axis.step);
@@ -127,8 +128,8 @@ Sai.CellMapView = Sai.BaseMapView.extend({
      
     axis.coordScale = (end - start) / maxWorldCoordinates;
          
-    if(!hasStepIncrement && !hasStepCount){ // make and educated guess with 25 tick marks
-      tCount = 25;
+    if(!hasStepIncrement && !hasStepCount){ // use provide cellCount
+      tCount = cellCount;
       axis.step = ~~(maxWorldCoordinates/tCount);
     } else if(hasStepCount){ // use a total count of X
       tCount = axis.steps;
@@ -138,7 +139,6 @@ Sai.CellMapView = Sai.BaseMapView.extend({
     }
     
     axis.space = (end - start)/tCount;
-    axis.cellCount = tCount;
     tCount += 1; // add the last tick to the line
     axis.offset = 0;
     
