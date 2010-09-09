@@ -70,7 +70,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       width = (endX - startX);
       aa = this._calculateForAxis(xaBottom, startX, endX, xCellCount, width);
       xaBottom = aa[0]; tCount = aa[1];
-      if (SC.none(xaBottom.hidden) || !xaBottom.hidden) this.makeAxis(canvas, startX, startY, endX, startY, xaBottom, {direction: 'x-bottom', len: 5, count: tCount, space: xaBottom.space, offset: xaBottom.offset});
+      if (SC.none(xaBottom.hidden) || !xaBottom.hidden) this.makeAxis(canvas, startX, startY, endX, startY, xaBottom, {position: 'x-bottom', len: 5, count: tCount, space: xaBottom.space, offset: xaBottom.offset});
     }
     if (xaTop){
       // Calculate the coordinate system
@@ -79,7 +79,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       width = (endX - startX);
       aa = this._calculateForAxis(xaTop, startX, endX, xCellCount, width);
       xaTop = aa[0]; tCount = aa[1];
-      if (SC.none(xaTop.hidden) || !xaTop.hidden) this.makeAxis(canvas, startX, endY, endX, endY, xaTop, {direction: 'x-top', len: 5, count: tCount, space: xaTop.space, offset: xaTop.offset});
+      if (SC.none(xaTop.hidden) || !xaTop.hidden) this.makeAxis(canvas, startX, endY, endX, endY, xaTop, {position: 'x-top', len: 5, count: tCount, space: xaTop.space, offset: xaTop.offset});
     }
 
     // Y axes
@@ -89,7 +89,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       height = (startY - endY);
       aa = this._calculateForAxis(yaLeft, endY, startY, yCellCount, height);
       yaLeft = aa[0]; tCount = aa[1];
-      if (SC.none(yaLeft.hidden) || !yaLeft.hidden) this.makeAxis(canvas, startX, startY, startX, endY, yaLeft, {direction: 'y-left', len: 5, count: tCount, space: yaLeft.space, offset: yaLeft.offset});
+      if (SC.none(yaLeft.hidden) || !yaLeft.hidden) this.makeAxis(canvas, startX, startY, startX, endY, yaLeft, {position: 'y-left', len: 5, count: tCount, space: yaLeft.space, offset: yaLeft.offset});
     }
     if (yaRight){
       yaRight.coordMin = endY;
@@ -97,7 +97,7 @@ Sai.CellMapView = Sai.BaseMapView.extend({
       height = (startY - endY);
       aa = this._calculateForAxis(yaRight, endY, startY, yCellCount, height);
       yaRight = aa[0]; tCount = aa[1];
-      if (SC.none(yaRight.hidden) || !yaRight.hidden) this.makeAxis(canvas, endX, startY, endX, endY, yaRight, {direction: 'y-right', len: 5, count: tCount, space: yaRight.space, offset: yaRight.offset});
+      if (SC.none(yaRight.hidden) || !yaRight.hidden) this.makeAxis(canvas, endX, startY, endX, endY, yaRight, {position: 'y-right', len: 5, count: tCount, space: yaRight.space, offset: yaRight.offset});
     }
     
     return [xaBottom, xaTop, yaLeft, yaRight];
@@ -111,15 +111,26 @@ Sai.CellMapView = Sai.BaseMapView.extend({
         cellWidth = (bottomAxis.coordMax - bottomAxis.coordMin) / dAttrs.xCellCount,
         cellHeight = (leftAxis.coordMax - leftAxis.coordMin) / dAttrs.yCellCount,
         yCellCount = dAttrs.yCellCount,
-        colors = dAttrs.color || dAttrs.colors || 'blue';
+        colorParam = dAttrs.color || dAttrs.colors || 'blue',
+        fillColor, strokeColor;
     d.forEach( function(point, i) {
       x = bottomAxis.coordMin + ((point[0]-1) * cellWidth);
       
       // flip y
       y = leftAxis.coordMax - (point[1] * cellHeight);
 
+      // Colors can be set per cell, or as all in one color
+      if (SC.typeOf(colorParam) === SC.T_ARRAY) {
+        fillColor = colorParam[i].fill;
+        strokeColor = colorParam[i].stroke;
+      }
+      else {
+        fillColor = colorParam;
+        strokeColor = colorParam;
+      }
+
       // draw the rectangle for the cell
-      canvas.rectangle(x, y, cellWidth, cellHeight, 0, {stroke: colors[i], fill: colors[i]}, 'cell-%@-%@'.fmt(x, y));
+      canvas.rectangle(x, y, cellWidth, cellHeight, 0, {stroke: strokeColor, fill: fillColor}, 'cell-%@-%@'.fmt(x, y));
     });
   },
 
