@@ -31,8 +31,11 @@ Sai.BaseMapView = Sai.CanvasView.extend({
   // @param topAxis: top axis
   topAxis: null,
 
-  // @param labels: general labels
+  // @param axisAnchoredLabels: labels anchored at axis points
   axisAnchoredLabels: null,
+  
+  // @param canvasAnchoredLabels: general labels
+  canvasAnchoredLabels: null,
   
   displayProperties: 'grid gridAttrs leftAxis rightAxis bottomAxis topAxis labels'.w(),
   
@@ -40,6 +43,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     var margins = this.get('margins'),
         grid = this.get('grid'),
         axisAnchoredLabels = this.get('axisAnchoredLabels') || [],
+        canvasAnchoredLabels = this.get('canvasAnchoredLabels') || [],
         f = this.get('frame'), axes;
 
     if (!firstTime) canvas.clear();  
@@ -49,6 +53,8 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     this._makeCells(f, canvas, grid, axes[0], axes[1], axes[2], axes[3]);
 
     this._makeAxisAnchoredLabels(f, canvas, grid, axes[0], axes[1], axes[2], axes[3], axisAnchoredLabels);
+
+    this._makeCanvasAnchoredLabels(f, canvas, canvasAnchoredLabels);
   },
   
   _makeAxes: function(f, canvas, margins, grid){
@@ -175,6 +181,56 @@ Sai.BaseMapView = Sai.CanvasView.extend({
         });
       }
     }
+  },
+
+  _makeCanvasAnchoredLabels: function(f, canvas, labels){
+    var x, y;
+
+    labels.forEach( function(label) {
+      switch (label.anchor) {
+      case 'bottom-left':
+        x = 0;
+        y = canvas.height;
+        break;
+      case 'top-left':
+        x = 0;
+        y = 0;
+        break;
+      case 'bottom-right':
+        x = canvas.width;
+        y = canvas.height;
+        break;
+      case 'top-right':
+        x = canvas.width;
+        y = 0;
+        break;
+      case 'left-middle':
+        x = 0;
+        y = canvas.height / 2;
+        break;
+      case 'right-middle':
+        x = canvas.width;
+        y = canvas.height / 2;
+        break;
+      case 'top-middle':
+        x = canvas.width / 2;
+        y = 0;
+        break;
+      case 'bottom-middle':
+        x = canvas.width / 2;
+        y = canvas.height;
+        break;
+      default:
+        x = 0;
+        y = 0;
+        break;
+      }
+
+      x = +x + label.xOffset;
+      y = +y + label.yOffset;
+
+      canvas.text(x, y, label.width, label.height, label.label, label.labelAttrs);
+    });
   },
 
   _makeAxisAnchoredLabels: function(f, canvas, grid, bottomAxis, topAxis, leftAxis, rightAxis, labels){
