@@ -159,11 +159,10 @@ Sai.BaseMapView = Sai.CanvasView.extend({
 
       if (grid.showCellNodesAsPoints && grid.showCellNodesAsPoints === YES) {
         grid.cells.forEach( function(cell) {
-          x = minX + ((cell.col-1) * cellWidth);
-          y = minY - (cell.row * cellHeight);
-          // hardcoded at radius 5 for now
-          // [TODO] add attr handling to circle
-          canvas.circle(x, y, 5);
+          x = minX + ((cell.col-1) * cellWidth) + (cellWidth / 2);
+          y = minY - (cell.row * cellHeight) + (cellHeight / 2);
+          // hardcoded at radius 10 for now
+          canvas.circle(x, y, 10, {stroke: cell.color.stroke, fill: cell.color.fill}, 'cell-%@-%@'.fmt(cell.col, cell.row));
         });
       }
 
