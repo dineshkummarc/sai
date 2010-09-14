@@ -58,7 +58,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
 
     this._makeCells(f, canvas, grid, axes[0], axes[1], axes[2], axes[3]);
 
-    this._makeAxisAnchoredLabels(f, canvas, grid, axes[0], axes[1], axes[2], axes[3], axisAnchoredLabels);
+    this._makeAxisAnchoredLabels(f, canvas, grid, axes, axisAnchoredLabels);
 
     this._makeCanvasAnchoredLabels(f, canvas, canvasAnchoredLabels);
   },
@@ -234,55 +234,66 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     });
   },
 
-  _makeAxisAnchoredLabels: function(f, canvas, grid, bottomAxis, topAxis, leftAxis, rightAxis, labels){
+  _xyFromAxes: function(axes, anchor){
+    var x, y, xAxis, yAxis, bottomAxis = axes[0], topAxis = axes[1], leftAxis = axes[2], rightAxis = axes[3];
+
+    if ((bottomAxis || topAxis) && (leftAxis || rightAxis)) {
+      xAxis = !SC.none(bottomAxis) ? bottomAxis : topAxis;
+      yAxis = !SC.none(leftAxis) ? leftAxis: rightAxis;
+
+      switch (anchor) {
+      case 'bottom-left':
+        x = xAxis.minCoord;
+        y = yAxis.maxCoord;
+        break;
+      case 'top-left':
+        x = xAxis.minCoord;
+        y = yAxis.minCoord;
+        break;
+      case 'bottom-right':
+        x = xAxis.maxCoord;
+        y = yAxis.maxCoord;
+        break;
+      case 'top-right':
+        x = xAxis.maxCoord;
+        y = yAxis.minCoord;
+        break;
+      case 'left-middle':
+        x = xAxis.minCoord;
+        y = yAxis.maxCoord + (yAxis.minCoord - yAxis.maxCoord) / 2;
+        break;
+      case 'right-middle':
+        x = xAxis.maxCoord;
+        y = yAxis.maxCoord + (yAxis.minCoord - yAxis.maxCoord) / 2;
+        break;
+      case 'top-middle':
+        x = xAxis.minCoord + (xAxis.maxCoord - xAxis.minCoord) / 2;
+        y = yAxis.minCoord;
+        break;
+      case 'bottom-middle':
+        x = xAxis.minCoord + (xAxis.maxCoord - xAxis.minCoord) / 2;
+        y = yAxis.maxCoord;
+        break;
+      default:
+        break;
+      }
+    }
+    return [x, y];
+  },
+
+  _makeAxisAnchoredLabels: function(f, canvas, grid, axes, labels){
     var x, y;
 
     labels.forEach( function(label) {
-      if ((bottomAxis || topAxis) && (leftAxis || rightAxis)) {
-        switch (label.anchor) {
-        case 'bottom-left':
-          x = !SC.none(bottomAxis) ? bottomAxis.minCoord : topAxis.minCoord;
-          y = !SC.none(leftAxis) ? leftAxis.maxCoord : rightAxis.maxCoord;
-          break;
-        case 'top-left':
-          x = !SC.none(bottomAxis) ? bottomAxis.minCoord : topAxis.minCoord;
-          y = !SC.none(leftAxis) ? leftAxis.minCoord : rightAxis.minCoord;
-          break;
-        case 'bottom-right':
-          x = !SC.none(bottomAxis) ? bottomAxis.maxCoord : topAxis.maxCoord;
-          y = !SC.none(leftAxis) ? leftAxis.maxCoord : rightAxis.maxCoord;
-          break;
-        case 'top-right':
-          x = !SC.none(bottomAxis) ? bottomAxis.maxCoord : topAxis.maxCoord;
-          y = !SC.none(leftAxis) ? leftAxis.minCoord : rightAxis.minCoord;
-          break;
-        case 'left-middle':
-          x = !SC.none(bottomAxis) ? bottomAxis.minCoord : topAxis.minCoord;
-          y = !SC.none(leftAxis) ? (leftAxis.maxCoord + (leftAxis.minCoord - leftAxis.maxCoord) / 2) : (rightAxis.maxCoord + (rightAxis.minCoord - rightAxis.maxCoord) / 2);
-          break;
-        case 'right-middle':
-          x = !SC.none(bottomAxis) ? bottomAxis.maxCoord : topAxis.maxCoord;
-          y = !SC.none(leftAxis) ? (leftAxis.maxCoord + (leftAxis.minCoord - leftAxis.maxCoord) / 2) : (rightAxis.maxCoord + (rightAxis.minCoord - rightAxis.maxCoord) / 2);
-          break;
-        case 'top-middle':
-          x = !SC.none(bottomAxis) ? (bottomAxis.minCoord + (bottomAxis.maxCoord - bottomAxis.minCoord) / 2) : (topAxis.minCoord + (topAxis.maxCoord - topAxis.minCoord) / 2);
-          y = !SC.none(leftAxis) ? leftAxis.minCoord : rightAxis.minCoord;
-          break;
-        case 'bottom-middle':
-          x = !SC.none(bottomAxis) ? (bottomAxis.minCoord + (bottomAxis.maxCoord - bottomAxis.minCoord) / 2) : (topAxis.minCoord + (topAxis.maxCoord - topAxis.minCoord) / 2);
-          y = !SC.none(leftAxis) ? leftAxis.maxCoord : rightAxis.maxCoord;
-          break;
-        default:
-          x = 0;
-          y = 0;
-          break;
-        }
+      xy = this._xyFromAxes(axes, label.anchor);
 
-        x = +x + label.xOffset;
-        y = +y + label.yOffset;
+      x = xy[0];
+      y = xy[1];
 
-        canvas.text(x, y, label.width, label.height, label.label, label.labelAttrs);
-      }
+      x = +x + label.xOffset;
+      y = +y + label.yOffset;
+
+      canvas.text(x, y, label.width, label.height, label.label, label.labelAttrs);
     });
   },
 
