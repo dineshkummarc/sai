@@ -58,7 +58,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
 
     this._makeCells(f, canvas, grid, axes[0], axes[1], axes[2], axes[3]);
 
-    this._makeAxisAnchoredLabels(f, canvas, grid, axes, axisAnchoredLabels);
+    this._makeAxisAnchoredLabels(this, f, canvas, grid, axes, axisAnchoredLabels);
 
     this._makeCanvasAnchoredLabels(f, canvas, canvasAnchoredLabels);
   },
@@ -245,10 +245,10 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     return [xAxis, yAxis];
   },
 
-  _xyFromAxes: function(axes, anchor){
+  _xyFromAxes: function(thisme, axes, anchor){
     var x, y, xAxis, yAxis;
 
-    xyAxes = this._activeAxes(axes);
+    xyAxes = thisme._activeAxes(axes);
     xAxis = xyAxes[0];
     yAxis = xyAxes[1];
 
@@ -293,11 +293,11 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     return [x, y];
   },
 
-  _makeAxisAnchoredLabels: function(f, canvas, grid, axes, labels){
+  _makeAxisAnchoredLabels: function(thisme, f, canvas, grid, axes, labels){
     var x, y;
 
     labels.forEach( function(label) {
-      xy = this._xyFromAxes(axes, label.anchor);
+      xy = thisme._xyFromAxes(thisme, axes, label.anchor);
 
       x = xy[0];
       y = xy[1];
