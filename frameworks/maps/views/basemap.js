@@ -234,13 +234,25 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     });
   },
 
-  _xyFromAxes: function(axes, anchor){
-    var x, y, xAxis, yAxis, bottomAxis = axes[0], topAxis = axes[1], leftAxis = axes[2], rightAxis = axes[3];
+  _activeAxes: function(axes){
+    var xAxis, yAxis, bottomAxis = axes[0], topAxis = axes[1], leftAxis = axes[2], rightAxis = axes[3];
 
     if ((bottomAxis || topAxis) && (leftAxis || rightAxis)) {
       xAxis = !SC.none(bottomAxis) ? bottomAxis : topAxis;
       yAxis = !SC.none(leftAxis) ? leftAxis: rightAxis;
+    }
 
+    return [xAxis, yAxis];
+  },
+
+  _xyFromAxes: function(axes, anchor){
+    var x, y, xAxis, yAxis;
+
+    xyAxes = this._activeAxes(axes);
+    xAxis = xyAxes[0];
+    yAxis = xyAxes[1];
+
+    if (xAxis && yAxis) {
       switch (anchor) {
       case 'bottom-left':
         x = xAxis.minCoord;
