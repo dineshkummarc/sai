@@ -48,7 +48,11 @@ Sai.BaseMapView = Sai.CanvasView.extend({
 
     if (!firstTime) canvas.clear();  
 
-    if (SC.none(grid)) grid = this.makeDefaultGrid();
+    // If the grid isn't provided
+    if (SC.none(grid)) grid = this._makeDefaultGrid();
+
+    // If the grid is supplied with cols, rows, but no actual cells
+    if (SC.none(grid.cells)) grid.cells = this._makeDefaultCells(grid);
 
     axes = this._makeAxes(f, canvas, margins, grid) || [];
 
@@ -488,6 +492,20 @@ Sai.BaseMapView = Sai.CanvasView.extend({
                      { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 3, row: 1 },
                      { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 4, row: 1 },
                      { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 5, row: 1 }]};
+  },
+  
+  _makeDefaultCells: function(grid){
+    // Default grid has 5 columns and 5 rows
+    //
+    // Nothing is shown, but nodeAnchoredLabels will still work.
+    //
+    var cells = [];
+    for (var i=0; i<grid.cols; i++){
+      for (var j=0; j<grid.rows; j++){
+        cells.push({ color: { fill: 'white',  stroke: 'black'}, value: 0, col: i, row: j });
+      }
+    }
+    return cells;
   }
   
 });
