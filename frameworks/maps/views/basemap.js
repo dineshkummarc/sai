@@ -245,10 +245,10 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     return [xAxis, yAxis];
   },
 
-  _xyFromAxes: function(thisme, axes, anchor){
+  _xyFromAxes: function(self, axes, anchor){
     var x, y, xAxis, yAxis;
 
-    xyAxes = thisme._activeAxes(axes);
+    xyAxes = self._activeAxes(axes);
     xAxis = xyAxes[0];
     yAxis = xyAxes[1];
 
@@ -293,11 +293,11 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     return [x, y];
   },
 
-  _makeAxisAnchoredLabels: function(thisme, f, canvas, grid, axes, labels){
+  _makeAxisAnchoredLabels: function(self, f, canvas, grid, axes, labels){
     var x, y;
 
     labels.forEach( function(label) {
-      xy = thisme._xyFromAxes(thisme, axes, label.anchor);
+      xy = self._xyFromAxes(self, axes, label.anchor);
 
       x = xy[0];
       y = xy[1];
@@ -314,7 +314,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
 
     // If axis is provided, min and max are properties, in real
     // world coordinates.  Otherwise, the default axes will be 
-    // true scale (1.0) in pixels, because end and start coming 
+    // true scale (1.0) in pixels, because end and start coming in
     // are already in pixel coordinates.
     var minRealWorldCoordinate = !SC.none(axis) ? axis.min : end;
     var maxRealWorldCoordinate = !SC.none(axis) ? axis.max : start;
