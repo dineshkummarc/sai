@@ -48,6 +48,8 @@ Sai.BaseMapView = Sai.CanvasView.extend({
 
     if (!firstTime) canvas.clear();  
 
+    if (SC.none(grid)) grid = this.makeDefaultGrid();
+
     axes = this._makeAxes(f, canvas, margins, grid) || [];
 
     this._makeCells(f, canvas, grid, axes[0], axes[1], axes[2], axes[3]);
@@ -75,8 +77,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
       // Calculate the coordinate system
       xaBottom.minCoord = startX;
       xaBottom.maxCoord = endX;
-      width = (endX - startX);
-      aa = this._calculateForAxis(xaBottom, startX, endX, cols, width);
+      aa = this._calculateForAxis(xaBottom, startX, endX, cols);
       xaBottom = aa[0]; tCount = aa[1];
       if (SC.none(xaBottom.hidden) || !xaBottom.hidden) this._makeAxis(canvas, startX, startY, endX, startY, xaBottom, {position: 'x-bottom', len: 5, count: tCount, space: xaBottom.space, offset: xaBottom.offset});
     }
@@ -84,8 +85,7 @@ Sai.BaseMapView = Sai.CanvasView.extend({
       // Calculate the coordinate system
       xaTop.minCoord = startX;
       xaTop.maxCoord = endX;
-      width = (endX - startX);
-      aa = this._calculateForAxis(xaTop, startX, endX, cols, width);
+      aa = this._calculateForAxis(xaTop, startX, endX, cols);
       xaTop = aa[0]; tCount = aa[1];
       if (SC.none(xaTop.hidden) || !xaTop.hidden) this._makeAxis(canvas, startX, endY, endX, endY, xaTop, {position: 'x-top', len: 5, count: tCount, space: xaTop.space, offset: xaTop.offset});
     }
@@ -94,16 +94,14 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     if (yaLeft){
       yaLeft.minCoord = endY;
       yaLeft.maxCoord = startY;
-      height = (endY - startY);
-      aa = this._calculateForAxis(yaLeft, endY, startY, rows, height);
+      aa = this._calculateForAxis(yaLeft, endY, startY, rows);
       yaLeft = aa[0]; tCount = aa[1];
       if (SC.none(yaLeft.hidden) || !yaLeft.hidden) this._makeAxis(canvas, startX, startY, startX, endY, yaLeft, {position: 'y-left', len: 5, count: tCount, space: yaLeft.space, offset: yaLeft.offset});
     }
     if (yaRight){
       yaRight.minCoord = endY;
       yaRight.maxCoord = startY;
-      height = (endY - startY);
-      aa = this._calculateForAxis(yaRight, endY, startY, rows, height);
+      aa = this._calculateForAxis(yaRight, endY, startY, rows);
       yaRight = aa[0]; tCount = aa[1];
       if (SC.none(yaRight.hidden) || !yaRight.hidden) this._makeAxis(canvas, endX, startY, endX, endY, yaRight, {position: 'y-right', len: 5, count: tCount, space: yaRight.space, offset: yaRight.offset});
     }
@@ -117,7 +115,6 @@ Sai.BaseMapView = Sai.CanvasView.extend({
         y, ySpace = leftAxis.space,
         yOffset = (ySpace*leftAxis.offset), 
         cellWidth, cellHeight,
-        colors = grid.colors,
         fillColor, strokeColor,
         index = 0;
 
@@ -285,25 +282,36 @@ Sai.BaseMapView = Sai.CanvasView.extend({
     });
   },
 
-  _calculateForAxis: function(axis, start, end, cellCount, maxWorldCoordinates){
+  _calculateForAxis: function(axis, start, end, cellCount){
     var tCount, hasStepIncrement, hasStepCount;
+
+    // If axis is provided, min and max are properties, in real
+    // world coordinates.  Otherwise, the default axes will be 
+    // true scale (1.0) in pixels, because end and start coming 
+    // are already in pixel coordinates.
+    var minRealWorldCoordinate = !SC.none(axis) ? axis.min : end;
+    var maxRealWorldCoordinate = !SC.none(axis) ? axis.max : start;
+
     axis = axis || {};
     hasStepIncrement = !SC.none(axis.step);
     hasStepCount = !SC.none(axis.steps);
      
-    axis.coordScale = (end - start) / maxWorldCoordinates;
+    var reachPixels = end - start;
+    var reachRealWorld = maxRealWorldCoordinate - minRealWorldCoordinate;
+
+    axis.coordScale = reachPixels / reachRealWorld;
          
     if (!hasStepIncrement && !hasStepCount){ // use provided cellCount
       tCount = cellCount;
-      axis.step = ~~(maxWorldCoordinates/tCount);
+      axis.step = ~~(reachPixels/tCount);
     } else if(hasStepCount){ // use a total count of X
       tCount = axis.steps;
-      axis.step = ~~(maxWorldCoordinates/tCount);
+      axis.step = ~~(reachPixels/tCount);
     } else { // Use step increments of X
-      tCount = ~~(maxWorldCoordinates / axis.step);
+      tCount = ~~(reachPixels / axis.step);
     }
     
-    axis.space = (end - start)/tCount;
+    axis.space = reachPixels/tCount;
     tCount += 1; // add the last tick to the line
     axis.offset = 0;
     
@@ -442,6 +450,44 @@ Sai.BaseMapView = Sai.CanvasView.extend({
   rounder: function(coord){
     if (coord > (~~coord+0.00051)) return coord.toFixed(3);
     return coord.toFixed(0);
+  },
+
+  _makeDefaultGrid: function(){
+    // Default grid has 5 columns and 5 rows
+    //
+    // Nothing is shown, but nodeAnchoredLabels will still work.
+    //
+    return { cols: 5, rows: 5, 
+             showCellRects: NO, 
+             showCellValues: NO, 
+             showCellNodesAsPlusses: NO, 
+             showCellNodesAsPoints: NO, 
+             showCellRectCornersAsPlusses: NO,
+             cells: [{ color: { fill: 'white',  stroke: 'black'}, value: 0, col: 1, row: 5 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 2, row: 5 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 3, row: 5 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 4, row: 5 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 5, row: 5 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 1, row: 4 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 2, row: 4 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 3, row: 4 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 4, row: 4 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 5, row: 4 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 1, row: 3 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 2, row: 3 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 3, row: 3 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 4, row: 3 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 5, row: 3 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 1, row: 2 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 2, row: 2 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 3, row: 2 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 4, row: 2 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 5, row: 2 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 1, row: 1 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 2, row: 1 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 3, row: 1 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 4, row: 1 },
+                     { color: { fill: 'white',  stroke: 'black'}, value: 0, col: 5, row: 1 }]};
   }
   
 });
