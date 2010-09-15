@@ -89,6 +89,8 @@ class HSB {
     printHSB(0.667f, 0.75f, 0.75f);
     System.out.println("180.0f, 1.0f,  1.0f");
     printHSB(0.500f, 1.0f,  1.0f);
+    System.out.println("0.0f, 1.0f,  0.75f");
+    printHSB(0.0f, 1.0f,  0.75f);
   }
 }
 
