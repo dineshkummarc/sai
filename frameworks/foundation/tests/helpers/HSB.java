@@ -75,22 +75,35 @@ class HSB {
     //System.out.println(sb);
     //System.out.println(ToHexColor(sb.toString()));
 
+    // Commented-out lines in the following block are excerpts from the hsb2rbg tests
+      
+    // test("Function: hsb2rgb(): Check Zero Case", function() { (0, 0, 33.3), '#555555',
     System.out.println("  0.0f, 0.0f,  0.333f");
     printHSB(  0.0f, 0.0f,  0.333f);
+    // test("Function: hsb2rgb(): Check Max Case", function() { (360, 100, 100), '#FF0000',
     System.out.println("360.0f, 1.0f,  1.0f");
     printHSB(1.0f, 1.0f,  1.0f);
+    // test("Function: hsb2rgb(): Check General Case 1", function() { (120, 79, 52), '#1C851C',
     System.out.println("120.0f, 0.79f, 0.52f");
     printHSB(0.333f, 0.79f, 0.52f);
+    // test("Function: hsb2rgb(): Check General Case 2", function() { (60, 50, 50), '#7F8040',
     System.out.println(" 60.0f, 0.50f, 0.50f");
     printHSB(0.167f, 0.50f, 0.50f);
+    // test("Function: hsb2rgb(): Check General Case 3", function() { (180, 65, 25), '#164040',
     System.out.println("180.0f, 0.65f, 0.25f");
     printHSB(0.500f, 0.65f, 0.25f);
+    // test("Function: hsb2rgb(): Check General Case 4", function() { (240, 75, 75), '#3030BF',
     System.out.println("240.0f, 0.75f, 0.75f");
     printHSB(0.667f, 0.75f, 0.75f);
+    // test("Function: hsb2rgb(): Check General Case 5", function() { (180, 100, 100), '#00FFFF',
     System.out.println("180.0f, 1.0f,  1.0f");
     printHSB(0.500f, 1.0f,  1.0f);
+    // test("Function: resetColor() basic case", function() {
+    //   (), '#BF0000', "null values, checking that null is #BF0000");
     System.out.println("0.0f, 1.0f,  0.75f");
     printHSB(0.0f, 1.0f,  0.75f);
+    // test("Function: resetColor() basic case", function() {
+    //   (), '#BF5600', "2 calls the color value should be #BF5600");
     System.out.println("0.075f, 1.0f,  0.75f");
     printHSB(0.075f, 1.0f,  0.75f);
   }
