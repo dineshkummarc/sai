@@ -1,1 +1,7 @@
 A framework for making interactive maps in SproutCore...
+
+To run tests, hit:
+
+http://localhost:4020/sai/foundation/en/current/tests.html
+
+(substituting maps, charts, etc. for foundation)
