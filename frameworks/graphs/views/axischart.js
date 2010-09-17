@@ -14,6 +14,7 @@ Sai.AxisChartView = Sai.CanvasView.extend({
     // Draw the line to the end
     path = 'M%@1,%@2L%@3,%@4M%@1,%@2'.fmt(rounder(sx), rounder(sy), rounder(ex), rounder(ey));
     if (ticks){
+      // console.log('ticks: %@, space: %@, start: {x: %@, y: %@}, end: {x: %@, y: %@}'.fmt(ticks.count, ticks.space, sx, sy, ex, ey));
       dir = ticks.direction;
       tLen = ticks.len;
       space = ticks.space;
@@ -51,7 +52,7 @@ Sai.AxisChartView = Sai.CanvasView.extend({
   
   makeLabels: function(canvas, tickPts, axisAttrs, ticks, tLabels){
     var dir, labels, l, lAttrs, tick, aa, t, labelPosFunc, col,
-        lWidth, lHeight, lOff;
+        lWidth, lHeight, lOff, lsw;
     
     aa = axisAttrs || {};
     dir = ticks ? ticks.direction || 'x' : 'x';
@@ -62,6 +63,7 @@ Sai.AxisChartView = Sai.CanvasView.extend({
     // FIXME: [EG] HATE THIS...need to find out how to calulate the middle point of a text
     lOff = lAttrs.offset || 0;
     col = aa.labelColor || aa.color || 'black';
+    lsw = SC.none(lAttrs.strokeWidth) || 0;
     
     // Create the label positioning function
     if (dir === 'x'){
@@ -69,7 +71,7 @@ Sai.AxisChartView = Sai.CanvasView.extend({
         var x, y;
         x = +t.x - (lWidth/2);
         y = +t.y + lOff;
-        canvas.text(x, y, lWidth, lHeight, label, {fill: col, stroke: col, textAnchor: 'center', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
+        canvas.text(x, y, lWidth, lHeight, label, {fill: col, stroke: col, textAnchor: 'center', fontSize: lAttrs.fontSize, strokeWidth: lsw}, 'label-%@'.fmt(label));
         // canvas.rectangle(x, y, lWidth, lHeight, 0, {fill: aa.labelColor || aa.color || 'black', textAnchor: 'center', fontSize: lAttrs.fontSize}, 'label-%@'.fmt(label));
       };
     }
