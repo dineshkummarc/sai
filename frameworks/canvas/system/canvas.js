@@ -76,7 +76,7 @@ Sai.Canvas = SC.Object.extend({
       y: y, 
       radius: radius,
       stroke: attrs.stroke || 'black',
-      strokeWidth: attrs.strokeWidth || 1,
+      strokeWidth: Sai.isZeroOrValue(attrs.strokeWidth, 0),
       fill: attrs.fill || 'none'
     });
     if (x.isCircle && !id) id = y ; // Allow to passin ID with premade object.
@@ -116,7 +116,7 @@ Sai.Canvas = SC.Object.extend({
       height: height,
       radius: radius,
       stroke: attrs.stroke || 'black',
-      strokeWidth: attrs.strokeWidth || 1,
+      strokeWidth: Sai.isZeroOrValue(attrs.strokeWidth, 0),
       fill: attrs.fill || 'none'
     });
     
